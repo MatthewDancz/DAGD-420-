@@ -114,9 +114,24 @@ class Polygon {
     }
 
     // TODO: calculate edge normals and store them in the normals array.    
+    int i = 0;
+    normals = new PVector[pointsTransformed.length];
+    while(i < pointsTransformed.length)
+    {
+      PVector holder = new PVector(pointsTransformed[i].y, -pointsTransformed[i].x);
+      normals[i] = holder.normalize();
+      i++;
+    }
 
     // update this object's AABB:
     aabb.recalc(pointsTransformed);
+  }
+  
+  float findNormalVector(PVector a, PVector b)
+  {
+    float Scalar = 0;
+    Scalar = a.x * b.x + a.y * b.y;
+    return Scalar;
   }
   /*
    * This method draws this Polygon object to the screen using the list of transformed points.
@@ -182,15 +197,27 @@ class Polygon {
    * @param Polygon poly  The other Polygon to check against this Polygon.
    * @return boolean  Whether or not these two Polygon objects are colliding.
    */
+   
   boolean checkCollision(Polygon poly) {
-
+    
     if (aabb.checkCollision(poly.aabb)) {
 
       // TODO: add narrow-phase collision detection here!
       // Use the normals array and project each object's transformed
       // points onto an axis aligned with EVERY normal of BOTH objects.
       // When doing projection, look for gaps between the objects.
-
+      for (int i = 0; i < pointsTransformed.length; i++)
+      {
+        PVector t = pointsTransformed[i].copy();
+        for (int j = 0; j < poly.pointsTransformed.length; j++)
+        {
+          PVector p = poly.pointsTransformed[j].copy();
+          p.sub(t);
+          float result = normals[i].dot(p);
+          println(result);
+          if (result < 0) return false;
+        }
+      }
       return true;
     }
     return false;
